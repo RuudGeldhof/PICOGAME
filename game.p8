@@ -2,7 +2,7 @@ pico-8 cartridge // http://www.pico-8.com
 version 18
 __lua__
 playerx = 64
-playery = 64
+playery = 28
 velx = 0
 vely = 0
 grounded = false
@@ -11,37 +11,50 @@ gravity = 0.5
 function _update()
   if (btn(0) and playerx > 0) playerx -= 1
   if (btn(1) and playerx < 127) playerx += 1
-  if (btn(2) and playery > 0 and grounded) vely -= 1
+  if (btn(2) and grounded) vely -= 4
   if (btn(3) and playery < 127) playery += 1
-dogravity()  
-checkcollission()
-
-playery += vely
+ 
+dovelocity()
+dogravity() 
 end
 
 function _draw()
 	cls()
 	spr(1,playerx,playery)
 	print(grounded)
+	print(vely)
 	map(0,0,0,0,16,16)
 end
 
-function checkcollission()
-	cellx = flr(playerx / 8)
-	celly = flr(playery / 8)
-	cellbelow = mget(cellx,celly+1)
-	if fget(cellbelow,0) then
-		grounded = true
+function dovelocity()
+	boundy = 0
+	if vely > 0 then boundy = 8 end
+	for i = 0,vely do
+		if checkpixelforcollision(playerx,playery+boundy+i) then
+			vely = i
+			break
+		end
+	end
+	playery += vely
+end
+
+function checkpixelforcollision(x,y)
+	cell = mget (flr(x / 8),flr(y / 8))
+	if fget(cell,0) then
+		return true
 	else
-		grounded = false
+		return false
 	end
 end
 
 function dogravity()
+	if checkpixelforcollision(playerx,playery+9) then
+		grounded = true
+	else
+		grounded = false
+	end
 	if not grounded then
 		vely += gravity
-	elseif vely > 0 then
-		vely = 0
 	end
 end
 __gfx__
