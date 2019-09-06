@@ -7,14 +7,26 @@ velx = 0
 vely = 0
 grounded = false
 gravity = 0.5
+maxvelx = 3
+velincr = 0.2
+veldecr = 0.5
 
 function _update()
-  if (btn(0) and playerx > 0) playerx -= 1
-  if (btn(1) and playerx < 127) playerx += 1
+  if btn(0) and not btn(1) and velx > -maxvelx
+  	then velx -= velincr
+  elseif (btn(1) and not btn(0) and velx < maxvelx) 
+  	then velx += velincr
+  elseif (velx > veldecr) 
+  	then velx -= veldecr
+  elseif (velx < -veldecr) 
+  	then velx +=veldecr
+  else 
+  velx = 0
+  end
   if (btn(2) and grounded) vely -= 4
   if (btn(3) and playery < 127) playery += 1
  
-dovelocity()
+--dovelocity()
 dogravity() 
 end
 
@@ -23,19 +35,41 @@ function _draw()
 	spr(1,playerx,playery)
 	print(grounded)
 	print(vely)
+	dovelocity()
 	map(0,0,0,0,16,16)
 end
 
 function dovelocity()
 	boundy = 0
-	if vely > 0 then boundy = 8 end
-	for i = 0,vely do
+	c = -1
+	if vely > 0 then 
+	boundy = 8 
+	c = 1
+	end
+	for i = 0,vely,c do
 		if checkpixelforcollision(playerx,playery+boundy+i) then
-			vely = i
+			playery += i
+			vely = 0
 			break
 		end
 	end
 	playery += vely
+
+--xcolissions
+	boundx = 0
+	c = -1
+	if velx > 0 then 
+	boundx = 8 
+	c = 1
+	end
+	for i = 0,vely,c do
+		if checkpixelforcollision(playerx+boundx+i,playery) then
+			playerx += i
+			velx = 0
+			break
+		end
+	end
+	playerx += velx
 end
 
 function checkpixelforcollision(x,y)
